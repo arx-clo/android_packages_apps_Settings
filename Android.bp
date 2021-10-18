@@ -122,6 +122,7 @@ android_library {
         "SystemUIUnfoldLib",
         "co.aospa.framework",
         "glide",
+        "VendorSupport-preference",
     ],
 
     libs: [
