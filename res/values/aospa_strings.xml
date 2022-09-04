@@ -198,4 +198,8 @@
     <!-- Floating rotation button -->
     <string name="enable_floating_rotation_button_title">Floating rotation button</string>
 
+    <!-- ArxLabs -->
+    <string name="arxlabs_title">ArxLabs</string>
+    <string name="arxlabs_summary">You can find Customization here!</string>
+
 </resources>

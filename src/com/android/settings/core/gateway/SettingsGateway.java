@@ -183,6 +183,8 @@ import com.android.settings.wifi.p2p.WifiP2pSettings;
 import com.android.settings.wifi.savedaccesspoints2.SavedAccessPointsWifiSettings2;
 import com.android.settings.wifi.tether.WifiTetherSettings;
 
+import com.aospa.support.Arxlabs;
+
 public class SettingsGateway {
 
     /**
@@ -354,6 +356,7 @@ public class SettingsGateway {
             TurnScreenOnSettings.class.getName(),
             TurnScreenOnDetails.class.getName(),
             RunningServices.class.getName(),
+            Arxlabs.class.getName()
     };
 
     public static final String[] SETTINGS_FOR_RESTRICTED = {
@@ -397,5 +400,6 @@ public class SettingsGateway {
             Settings.ModuleLicensesActivity.class.getName(),
             UserBackupSettingsActivity.class.getName(),
             Settings.DevRunningServicesActivity.class.getName(),
+            Settings.ArxlabsActivity.class.getName(),
     };
 }

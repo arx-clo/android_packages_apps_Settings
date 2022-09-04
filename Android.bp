@@ -75,7 +75,16 @@ android_library {
         "btadva_settings_java_defaults",
     ],
 
-    srcs: ["src/**/*.java", "src/**/*.kt"],
+    srcs: ["src/**/*.java", "src/**/*.kt",
+           "ArxLabs/src/**/*.java",
+    ],
+
+    aaptflags: ["--extra-packages com.aospa.support"],
+
+    resource_dirs: [
+        "res",
+        "ArxLabs/res",
+    ],
 
     static_libs: [
         "androidx-constraintlayout_constraintlayout",

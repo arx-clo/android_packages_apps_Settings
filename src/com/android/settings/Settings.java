@@ -456,4 +456,6 @@ public class Settings extends SettingsActivity {
     public static class PreviouslyConnectedDevicesActivity extends SettingsActivity { /* empty */ }
 
     public static class DevRunningServicesActivity extends SettingsActivity { /* empty */ }
+    // ArxLabs
+    public static class ArxlabsActivity extends SettingsActivity {}
 }
