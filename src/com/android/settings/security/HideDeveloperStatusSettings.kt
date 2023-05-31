@@ -22,9 +22,10 @@ import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.content.Context
+import android.content.pm.UserInfo
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.UserManager
 import android.provider.Settings
 import android.view.Menu
 import android.view.MenuInflater
@@ -43,7 +44,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 
-import com.android.internal.util.custom.HideDeveloperStatusUtils
+import com.android.internal.util.axion.HideDeveloperStatusUtils
 
 import com.android.settings.R
 
@@ -56,24 +57,42 @@ class HideDeveloperStatusSettings: Fragment(R.layout.hide_developer_status_layou
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: AppListAdapter
     private lateinit var packageList: List<PackageInfo>
-    private lateinit var appBarLayout: AppBarLayout
+    private lateinit var userManager: UserManager
+    private lateinit var userInfos: List<UserInfo>
+
+    private val appBarLayout: AppBarLayout by lazy{
+        requireActivity().findViewById(R.id.app_bar)
+    }
 
     private var searchText = ""
-    private var category: Int = CATEGORY_USER_ONLY
     private var customFilter: ((PackageInfo) -> Boolean)? = null
     private var comparator: ((PackageInfo, PackageInfo) -> Int)? = null
     private var hideDeveloperStatusUtils: HideDeveloperStatusUtils = HideDeveloperStatusUtils()
+    private var showSystem = false
+    private var optionsMenu: Menu? = null
+
+    override fun onStart() {
+        super.onStart()
+        updateOptionsMenu()
+        val host = getActivity()
+        if (host != null) {
+            host.invalidateOptionsMenu();
+        }
+    }
 
     @SuppressLint("QueryPermissionsNeeded")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
         requireActivity().setTitle(getTitle())
-        appBarLayout = requireActivity().findViewById(R.id.app_bar)
         activityManager = requireContext().getSystemService(ActivityManager::class.java)
         packageManager = requireContext().packageManager
-        packageList = packageManager.getInstalledPackages(0)
-        hideDeveloperStatusUtils.setApps(requireContext())
+        packageList = packageManager.getInstalledPackages(PackageManager.MATCH_ANY_USER)
+        userManager = UserManager.get(requireContext())
+        userInfos = userManager.getUsers()
+        for (info in userInfos) {
+            hideDeveloperStatusUtils.setApps(requireContext(), info.id)
+        }
     }
 
     private fun getTitle(): Int {
@@ -102,7 +121,16 @@ class HideDeveloperStatusSettings: Fragment(R.layout.hide_developer_status_layou
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        val activity = getActivity()
+        if (activity == null) {
+            return;
+        }
+        optionsMenu = menu;
         inflater.inflate(R.menu.hide_developer_status_menu, menu)
+
+        menu.findItem(R.id.show_system).setVisible(showSystem)
+        menu.findItem(R.id.hide_system).setVisible(!showSystem)
+
         val searchMenuItem = menu.findItem(R.id.search) as MenuItem
         searchMenuItem.setOnActionExpandListener(object: MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem): Boolean {
@@ -131,6 +159,37 @@ class HideDeveloperStatusSettings: Fragment(R.layout.hide_developer_status_layou
                 return true
             }
         })
+
+        updateOptionsMenu()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        var i = item.getItemId()
+        if (i == R.id.show_system || i == R.id.hide_system) {
+            showSystem = !showSystem;
+            refreshList();
+        }
+        updateOptionsMenu()
+        return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        updateOptionsMenu()
+    }
+
+    override fun onDestroyOptionsMenu() {
+        optionsMenu = null;
+    }
+
+    private fun updateOptionsMenu() {
+        if (optionsMenu == null) {
+            return;
+        }
+
+        var menu = optionsMenu as Menu
+
+        menu.findItem(R.id.show_system).setVisible(!showSystem)
+        menu.findItem(R.id.hide_system).setVisible(showSystem)
     }
 
     /**
@@ -140,10 +199,12 @@ class HideDeveloperStatusSettings: Fragment(R.layout.hide_developer_status_layou
      */
     private fun onListUpdate(packageName: String, isChecked: Boolean) {
         if (packageName.isBlank()) return
-        if (isChecked) {
-            hideDeveloperStatusUtils.addApp(requireContext(), packageName);
-        } else {
-            hideDeveloperStatusUtils.removeApp(requireContext(), packageName);
+        for (info in userInfos) {
+            if (isChecked) {
+                hideDeveloperStatusUtils.addApp(requireContext(), packageName, info.id)
+            } else {
+                hideDeveloperStatusUtils.removeApp(requireContext(), packageName, info.id)
+            }
         }
         try {
             activityManager.forceStopPackage(packageName);
@@ -157,10 +218,18 @@ class HideDeveloperStatusSettings: Fragment(R.layout.hide_developer_status_layou
 
     private fun refreshList() {
         var list = packageList.filter {
-            when (category) {
-                CATEGORY_SYSTEM_ONLY -> it.applicationInfo.isSystemApp()
-                CATEGORY_USER_ONLY -> !it.applicationInfo.isSystemApp()
-                else -> true
+            if (!showSystem) {
+                !it.applicationInfo.isSystemApp()
+                && !resources.getStringArray(
+                        R.array.hide_developer_status_hidden_apps)
+                            .asList().contains(it.applicationInfo.packageName)
+                && !it.applicationInfo.packageName.contains("android.settings")
+            } else {
+                !resources.getStringArray(
+                    R.array.hide_developer_status_hidden_apps)
+                        .asList().contains(it.applicationInfo.packageName)
+                && !it.applicationInfo.packageName.contains("android.settings")
+                && !it.applicationInfo.isResourceOverlay()
             }
         }.filter {
             getLabel(it).contains(searchText, true)
@@ -240,9 +309,6 @@ class HideDeveloperStatusSettings: Fragment(R.layout.hide_developer_status_layou
     )
 
     companion object {
-        const val CATEGORY_SYSTEM_ONLY = 0
-        const val CATEGORY_USER_ONLY = 1
-
         private val itemCallback = object: DiffUtil.ItemCallback<AppInfo>() {
             override fun areItemsTheSame(oldInfo: AppInfo, newInfo: AppInfo) =
                 oldInfo.packageName == newInfo.packageName
