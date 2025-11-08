@@ -16,6 +16,6 @@
 <resources
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
 
-    <color name="homepage_aospa_background">#FFCD00</color>
-
+     <color name="homepage_aospa_background">#FFCD00</color>
+     <color name="rvos_pref_ripple">#1f000000</color>
 </resources>

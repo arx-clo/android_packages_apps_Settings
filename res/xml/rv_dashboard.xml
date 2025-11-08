@@ -7,13 +7,16 @@
         android:layout="@layout/rv_dashboard_account"
         android:key="rv_my_account"
         android:order="-110" />
+        
     <com.android.settings.widget.HomepagePreference
         android:key="top_level_arxlabs"
         android:title="@string/arxlabs_title"
         android:summary="@string/arxlabs_summary"
-        android:icon="@drawable/ic_settings_arx"
+        android:icon="@drawable/rvos_pref_card_extensions"
         android:order="-100"
-        android:fragment="com.aospa.support.Arxlabs"/>
+        android:fragment="com.aospa.support.Arxlabs"
+        settings:layout="@layout/rvos_dashboard_extensions" />
+
     <SwitchPreference
         android:icon="@drawable/settings_airplane_ic"
         android:title="@string/airplane_mode"

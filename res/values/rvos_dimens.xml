@@ -30,4 +30,9 @@
 
      <!-- Dashboard -->
      <dimen name="rv_dashboard_header_height">225dp</dimen>
+
+     <!-- Extentions -->
+     <dimen name="rvos_pref_card_vertical_padding">32.0dip</dimen>
+     <dimen name="rvos_pref_card_horizontal_padding">16.0dip</dimen>
+     <dimen name="rvos_pref_card_radius">99.0dip</dimen>
 </resources>
