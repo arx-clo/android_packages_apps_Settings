@@ -81,7 +81,7 @@
     <string name="rv_fw_info">Android Information</string>
     <string name="firmware_info">Firmware Information</string>
     <string name="rv_firmware_brand">RvOS˚</string>
-    <string name="rv_firmware_desc">Long Term Use</string>
+    <string name="rv_firmware_desc">Extended Edition</string>
     <string name="build_date">Build date</string>
     <string name="about_device_name">Device</string>
      <!-- SELinux Status -->

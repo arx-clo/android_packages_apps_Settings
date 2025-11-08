@@ -62,7 +62,7 @@
     <style name="rvos_text_primary_medium">
         <item name="android:textSize">19.0sp</item>
         <item name="android:textColor">?android:textColorPrimary</item>
-        <item name="android:fontFamily">@android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
     </style>
     <style name="rvos_text_secondary">
         <item name="android:textSize">14.0sp</item>
